@@ -1,0 +1,4 @@
+global:
+  biz: "config_biz"
+foo:
+  zip: "config_zip"
