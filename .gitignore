@@ -1,2 +1,6 @@
-thor-addons-*.gem
+*.gem
+*.rbc
+.bundle
+Gemfile.lock
+.idea
 .*.swp
