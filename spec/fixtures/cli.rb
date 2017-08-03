@@ -74,4 +74,24 @@ class Cli < Thor
   end
 end
 
+class CliWithEnvAlias < Thor
+  include ThorAddons::Options
 
+  class_option :biz, type: :string, desc: "Biz"
+  class_option :config_file, type: :string, default: "config.yml", desc: "Biz"
+
+  method_option :bar, type: :string, desc: "Bar"
+  method_option :zip, type: :string, default: "zip", desc: "Zip"
+  desc "foo", "Foo"
+  def foo
+    options
+  end
+
+  private
+
+  def envs_aliases
+    {
+      "BAR" => "ALIAS_BAR"
+    }
+  end
+end

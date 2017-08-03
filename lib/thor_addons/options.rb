@@ -50,10 +50,18 @@ module ThorAddons
       options_a
     end
 
+    def envs_aliases
+      {}
+    end
+
     def options_from_env
       defaults.keys.inject({}) do |memo, option|
         env = option.to_s.upcase
         memo[option] = ENV[env] unless ENV[env].nil?
+
+        if envs_aliases.keys.include?(env) && memo[option].nil?
+          memo[option] = ENV[envs_aliases[env]] unless ENV[envs_aliases[env]].nil?
+        end
 
         memo
       end
