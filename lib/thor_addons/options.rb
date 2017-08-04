@@ -83,7 +83,9 @@ module ThorAddons
         end
       end
 
-      ::Thor::CoreExt::HashWithIndifferentAccess.new(data["global"].merge(command_options))
+      global = data["global"] || {}
+
+      ::Thor::CoreExt::HashWithIndifferentAccess.new(global.merge(command_options))
     end
 
     def add_defaults(hash)

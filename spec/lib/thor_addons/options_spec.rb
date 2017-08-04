@@ -45,6 +45,17 @@ module ThorAddons
 
           expect(CliNoEnv.start(args)).to eq(options)
         end
+
+        it "should not break when the global settings are missing" do
+          args = %W(foo)
+          opts = options.dup
+          opts.delete(:biz)
+          
+          allow(File).to receive(:file?).with(config_file).and_return(true)
+          allow(YAML).to receive(:load_file).with(config_file).and_return({})
+
+          expect(CliNoEnv.start(args)).to eq(opts)
+        end
       end
 
       context "with config and env" do
