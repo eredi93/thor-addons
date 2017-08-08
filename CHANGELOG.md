@@ -1,3 +1,9 @@
+0.1.3 (08/08/2017)
+
+BUG FIXES:
+
+ * Fix initialization bug #2 ([#4](https://github.com/eredi93/thor-addons/pull/4))
+
 0.1.2 (05/08/2017)
 
 BUG FIXES:
