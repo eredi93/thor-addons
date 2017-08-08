@@ -2,6 +2,12 @@ require "spec_helper"
 
 module ThorAddons
   describe Options do
+    describe "#new" do
+      it "should not failed when passed no parameters" do
+        Cli.new
+      end
+    end
+
     describe "#options" do
       let(:options) { ::Thor::CoreExt::HashWithIndifferentAccess.new(hash) }
 

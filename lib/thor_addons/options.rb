@@ -3,7 +3,7 @@ module ThorAddons
     attr_reader :current_command_name, :defaults, :invoked_via_subcommand, :invocations
 
     def initialize(args = [], local_options = {}, config = {})
-      @current_command_name = config[:current_command].name
+      @current_command_name = config[:current_command] ? config[:current_command].name : nil
       @defaults = load_defaults(config.dup)
       @invoked_via_subcommand = config[:invoked_via_subcommand]
       @invocations = config[:invocations]
@@ -35,7 +35,7 @@ module ThorAddons
         merge(new_options, options_from_env)
       end
 
-      ::Thor::CoreExt::HashWithIndifferentAccess.new(add_defaults(new_options))
+      hash_with_indifferent_access(add_defaults(new_options))
     end
 
     private
@@ -55,16 +55,17 @@ module ThorAddons
     end
 
     def options_from_env
+      opts = {}
       defaults.keys.inject({}) do |memo, option|
         env = option.to_s.upcase
-        memo[option] = ENV[env] unless ENV[env].nil?
+        opts[option] = ENV[env] unless ENV[env].nil?
 
-        if envs_aliases.keys.include?(env) && memo[option].nil?
-          memo[option] = ENV[envs_aliases[env]] unless ENV[envs_aliases[env]].nil?
-        end
+        next unless envs_aliases.keys.include?(env) && opts[option].nil? && ENV[envs_aliases[env]]
 
-        memo
+        opts[option] = ENV[envs_aliases[env]]
       end
+
+      hash_with_indifferent_access(opts)
     end
 
     def options_from_config(config_file)
@@ -75,17 +76,21 @@ module ThorAddons
 
       data = YAML.load_file(config_file)
       command_options = {}
+      global = data["global"] || {}
+
+      return hash_with_indifferent_access(global) if current_command_name.nil?
+
       if invoked_via_subcommand
         invocations.map { |k,v| v }.flatten.each do |subcommand|
           next if data[subcommand].nil? || data[subcommand][current_command_name].nil?
 
           command_options.merge!(data[subcommand][current_command_name])
         end
+      else
+        command_options.merge!(data[current_command_name]) unless data[current_command_name].nil?
       end
 
-      global = data["global"] || {}
-
-      ::Thor::CoreExt::HashWithIndifferentAccess.new(global.merge(command_options))
+      hash_with_indifferent_access(global.merge(command_options))
     end
 
     def add_defaults(hash)
@@ -122,6 +127,10 @@ module ThorAddons
 
         memo
       end
+    end
+
+    def hash_with_indifferent_access(hash)
+      ::Thor::CoreExt::HashWithIndifferentAccess.new(hash)
     end
   end
 end
