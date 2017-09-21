@@ -1,3 +1,9 @@
+0.1.4 (21/09/2017)
+
+BUG FIXES:
+
+ * Options override #2 ([#4](https://github.com/eredi93/thor-addons/pull/8))
+
 0.1.3 (08/08/2017)
 
 BUG FIXES:

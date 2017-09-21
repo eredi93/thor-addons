@@ -95,7 +95,7 @@ module ThorAddons
 
     def add_defaults(hash)
       hash.inject({}) do |memo, (k, v)|
-        memo[k] = v.nil? ? defaults[k] : v
+        memo[k] = v.nil? ? defaults[k.to_sym] : v
 
         memo
       end
@@ -103,7 +103,7 @@ module ThorAddons
 
     def remove_defaults(hash)
       hash.inject({}) do |memo, (k, v)|
-        if defaults[k] == v
+        if defaults[k.to_sym] == v
           memo[k] = nil
         else
           memo[k] = v

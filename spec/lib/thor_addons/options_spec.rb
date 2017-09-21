@@ -40,7 +40,7 @@ module ThorAddons
       end
 
       context "with config" do
-        let(:hash) { { zip: "zip", biz: "config_biz", config_file: "config.yml" } }
+        let(:hash) { { zip: "config_zip", biz: "config_biz", config_file: "config.yml" } }
         let(:config_file) { "config.yml" }
 
         it "should generate the correct options" do
@@ -52,22 +52,24 @@ module ThorAddons
           expect(CliNoEnv.start(args)).to eq(options)
         end
 
-        it "should not break when the global settings are missing" do
-          args = %W(foo)
-          opts = options.dup
-          opts.delete(:biz)
-          
-          allow(File).to receive(:file?).with(config_file).and_return(true)
-          allow(YAML).to receive(:load_file).with(config_file).and_return({})
+        context "global settings missing" do
+          let(:hash) { { zip: "zip", config_file: "config.yml" } }
 
-          expect(CliNoEnv.start(args)).to eq(opts)
+          it "should not break" do
+            args = %W(foo)
+            
+            allow(File).to receive(:file?).with(config_file).and_return(true)
+            allow(YAML).to receive(:load_file).with(config_file).and_return({})
+
+            expect(CliNoEnv.start(args)).to eq(options)
+          end
         end
       end
 
       context "with config and env" do
         let(:hash) do
           {
-            zip: "zip",
+            zip: "config_zip",
             biz: "config_biz",
             bar: "ENV_BAR",
             config_file: "config.yml"
@@ -97,7 +99,7 @@ module ThorAddons
       context "with env aliases" do
         let(:hash) do
           {
-            zip: "zip",
+            zip: "config_zip",
             bar: "ENV_ALIAS_BAR",
             biz: "config_biz",
             config_file: "config.yml"
