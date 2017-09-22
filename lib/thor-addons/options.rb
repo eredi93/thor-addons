@@ -20,7 +20,7 @@ module ThorAddons
     end
 
     def options
-      original = super
+      original = hash_with_indifferent_access(super)
       config_file = original[:config_file]
 
       return original unless with_env? || with_config_file?
@@ -95,7 +95,7 @@ module ThorAddons
 
     def add_defaults(hash)
       hash.inject({}) do |memo, (k, v)|
-        memo[k] = v.nil? ? defaults[k.to_sym] : v
+        memo[k] = v.nil? ? defaults[k] : v
 
         memo
       end
@@ -103,7 +103,7 @@ module ThorAddons
 
     def remove_defaults(hash)
       hash.inject({}) do |memo, (k, v)|
-        if defaults[k.to_sym] == v
+        if defaults[k] == v
           memo[k] = nil
         else
           memo[k] = v
@@ -118,7 +118,7 @@ module ThorAddons
       parse_options.merge!(config[:class_options]) if config[:class_options]
       parse_options.merge!(config[:command_options]) if config[:command_options]
 
-      parse_options.inject({}) do |memo, (key, value)|
+      options_hash = parse_options.inject({}) do |memo, (key, value)|
         begin
           memo[key] = value.default
         rescue NoMethodError
@@ -127,10 +127,12 @@ module ThorAddons
 
         memo
       end
+
+      hash_with_indifferent_access(options_hash)
     end
 
     def hash_with_indifferent_access(hash)
-      ::Thor::CoreExt::HashWithIndifferentAccess.new(hash)
+      ::SymbolizedHash.new(hash)
     end
   end
 end
