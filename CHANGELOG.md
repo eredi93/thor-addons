@@ -1,8 +1,14 @@
+0.1.5 (22/09/2017)
+
+BUG FIXES:
+
+ * Fix hash with indifferent access ([#10](https://github.com/eredi93/thor-addons/pull/10))
+
 0.1.4 (21/09/2017)
 
 BUG FIXES:
 
- * Options override #2 ([#4](https://github.com/eredi93/thor-addons/pull/8))
+ * Options override ([#8](https://github.com/eredi93/thor-addons/pull/8))
 
 0.1.3 (08/08/2017)
 
