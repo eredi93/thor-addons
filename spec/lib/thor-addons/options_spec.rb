@@ -9,7 +9,7 @@ module ThorAddons
     end
 
     describe "#options" do
-      let(:options) { ::Thor::CoreExt::HashWithIndifferentAccess.new(hash) }
+      let(:options) { ::SymbolizedHash.new(hash) }
 
       context "plain" do
         let(:hash) { { zip: "zip", biz: "option_biz" } }

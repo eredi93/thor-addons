@@ -1,5 +1,5 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
-require "thor_addons"
+require "thor-addons"
 
 load File.join(File.dirname(__FILE__), "fixtures", "cli.rb")
 
