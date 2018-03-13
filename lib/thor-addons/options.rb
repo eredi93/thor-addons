@@ -81,13 +81,19 @@ module ThorAddons
       return hash_with_indifferent_access(global) if current_command_name.nil?
 
       if invoked_via_subcommand
-        invocations.map { |k,v| v }.flatten.each do |subcommand|
-          next if data[subcommand].nil? || data[subcommand][current_command_name].nil?
+        first_invoked, *remaining_invoked = invocations.values.flatten
+        command_options = data[first_invoked] unless data[first_invoked].nil?
 
-          command_options.merge!(data[subcommand][current_command_name])
+        remaining_invoked.each do |subcommand|
+          break if command_options[subcommand].nil?
+
+          subcommand_data = command_options[subcommand]
+
+          command_options.delete(subcommand)
+          command_options.merge!(subcommand_data)
         end
       else
-        command_options.merge!(data[current_command_name]) unless data[current_command_name].nil?
+        command_options = data[current_command_name] unless data[current_command_name].nil?
       end
 
       hash_with_indifferent_access(global.merge(command_options))
@@ -122,7 +128,7 @@ module ThorAddons
         begin
           memo[key] = value.default
         rescue NoMethodError
-          memo[key] = nil 
+          memo[key] = nil
         end
 
         memo
