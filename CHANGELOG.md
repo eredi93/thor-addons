@@ -1,3 +1,9 @@
+0.1.5 (13/03/2018)
+
+BUG FIXES:
+
+ * Fix incorrectly parsing options from config ([#11](https://github.com/eredi93/thor-addons/pull/11))
+
 0.1.5 (22/09/2017)
 
 BUG FIXES:
