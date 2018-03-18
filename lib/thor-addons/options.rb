@@ -1,9 +1,10 @@
 module ThorAddons
   module Options
-    attr_reader :current_command_name, :defaults, :invoked_via_subcommand, :invocations
+    attr_reader :current_command_name, :defaults, :invoked_via_subcommand,
+      :invocations
 
     def initialize(args = [], local_options = {}, config = {})
-      @current_command_name = config[:current_command] ? config[:current_command].name : nil
+      @current_command_name = get_current_command_name(config)
       @defaults = load_defaults(config.dup)
       @invoked_via_subcommand = config[:invoked_via_subcommand]
       @invocations = config[:invocations]
@@ -17,6 +18,10 @@ module ThorAddons
 
     def with_config_file?
       true
+    end
+
+    def envs_aliases
+      {}
     end
 
     def options
@@ -38,11 +43,18 @@ module ThorAddons
       hash_with_indifferent_access(add_defaults(new_options))
     end
 
-    private
+    private def get_current_command_name(config)
+      return unless config[:current_command]
 
-    def merge(options_a, options_b)
+      config[:current_command].name
+    end
+
+    private def merge(options_a, options_b)
       options_b.each do |key, value|
-        next if value.to_s.empty? || !options_a[key].to_s.empty?
+        value_a = options_a[key]
+
+        next if value.nil? || value.empty?
+        next unless (value_a.nil? || value_a.empty?)
 
         options_a[key] = value
       end
@@ -50,31 +62,30 @@ module ThorAddons
       options_a
     end
 
-    def envs_aliases
-      {}
-    end
-
-    def options_from_env
-      opts = {}
-      defaults.keys.inject({}) do |memo, option|
+    private def options_from_env
+      opts = defaults.keys.each_with_object({}) do |option, hsh|
         env = option.to_s.upcase
-        opts[option] = ENV[env] unless ENV[env].nil?
+        hsh[option] = ENV[env] unless ENV[env].nil?
 
-        next unless envs_aliases.keys.include?(env) && opts[option].nil? && ENV[envs_aliases[env]]
+        next unless envs_aliases.keys.include?(env) &&
+          hsh[option].nil? &&
+          ENV[envs_aliases[env]]
 
-        opts[option] = ENV[envs_aliases[env]]
+        hsh[option] = ENV[envs_aliases[env]]
       end
 
       hash_with_indifferent_access(opts)
     end
 
-    def options_from_config(config_file)
-      unless File.file?(config_file)
-        STDERR.puts("[WARNING] Unable to read 'config_file' '#{config_file}' not found.")
-        return {}
-      end
+    private def parse_config_file(config_file)
+      YAML.load_file(config_file)
+    rescue Errno::ENOENT, Psych::SyntaxError
+      STDERR.puts("[WARN] Unable to parse 'config_file' '#{config_file}'.")
+      return {}
+    end
 
-      data = YAML.load_file(config_file)
+    private def options_from_config(config_file)
+      data = parse_config_file(config_file)
       command_options = {}
       global = data["global"] || {}
 
@@ -92,52 +103,42 @@ module ThorAddons
           command_options.delete(subcommand)
           command_options.merge!(subcommand_data)
         end
-      else
-        command_options = data[current_command_name] unless data[current_command_name].nil?
+      elsif data[current_command_name]
+        command_options = data[current_command_name]
       end
 
       hash_with_indifferent_access(global.merge(command_options))
     end
 
-    def add_defaults(hash)
-      hash.inject({}) do |memo, (k, v)|
-        memo[k] = v.nil? ? defaults[k] : v
-
-        memo
+    private def add_defaults(hash)
+      hash.each_with_object({}) do |(k, v), hsh|
+        hsh[k] = v.nil? ? defaults[k] : v
       end
     end
 
-    def remove_defaults(hash)
-      hash.inject({}) do |memo, (k, v)|
-        if defaults[k] == v
-          memo[k] = nil
-        else
-          memo[k] = v
-        end
-
-        memo
+    private def remove_defaults(hash)
+      hash.each_with_object({}) do |(k, v), hsh|
+        defaults[k] == v ? hsh[k] = nil : hsh[k] = v
       end
     end
 
-    def load_defaults(config)
+    private def load_defaults(config)
       parse_options = self.class.class_options.dup
       parse_options.merge!(config[:class_options]) if config[:class_options]
       parse_options.merge!(config[:command_options]) if config[:command_options]
 
-      options_hash = parse_options.inject({}) do |memo, (key, value)|
+      options_hash = parse_options.each_with_object({}) do |(key, value), hsh|
         begin
-          memo[key] = value.default
+          hsh[key] = value.default
         rescue NoMethodError
-          memo[key] = nil
+          hsh[key] = nil
         end
-
-        memo
       end
 
       hash_with_indifferent_access(options_hash)
     end
 
-    def hash_with_indifferent_access(hash)
+    private def hash_with_indifferent_access(hash)
       ::SymbolizedHash.new(hash)
     end
   end
