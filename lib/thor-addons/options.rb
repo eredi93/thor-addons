@@ -49,12 +49,19 @@ module ThorAddons
       config[:current_command].name
     end
 
+    private def empty_value?(value)
+      return true if value.is_a?(NilClass)
+      return true if value.respond_to?(:empty?) && value.empty?
+
+      false
+    end
+
     private def merge(options_a, options_b)
       options_b.each do |key, value|
         value_a = options_a[key]
 
-        next if value.nil? || value.empty?
-        next unless (value_a.nil? || value_a.empty?)
+        next if empty_value?(value)
+        next unless empty_value?(value_a)
 
         options_a[key] = value
       end
