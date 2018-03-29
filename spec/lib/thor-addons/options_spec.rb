@@ -29,7 +29,7 @@ module ThorAddons
           hash.keys.each do |option|
             if option == :bar
               allow(ENV).to receive(:[]).with(option.to_s.upcase)
-                .and_return(hash[option]) 
+                .and_return(hash[option])
             else
               allow(ENV).to receive(:[]).with(option.to_s.upcase)
             end
@@ -45,7 +45,7 @@ module ThorAddons
 
         it "should generate the correct options" do
           args = %W(foo)
-          
+
           allow(File).to receive(:file?).with(config_file).and_return(true)
           allow(YAML).to receive(:load_file).with(config_file).and_return(config_fixture)
 
@@ -57,7 +57,7 @@ module ThorAddons
 
           it "should not break" do
             args = %W(foo)
-            
+
             allow(File).to receive(:file?).with(config_file).and_return(true)
             allow(YAML).to receive(:load_file).with(config_file).and_return({})
 
@@ -79,11 +79,11 @@ module ThorAddons
 
         it "should generate the correct options" do
           args = %W(foo)
-          
+
           hash.keys.each do |option|
             if option == :bar
               allow(ENV).to receive(:[]).with(option.to_s.upcase)
-                .and_return(hash[option]) 
+                .and_return(hash[option])
             else
               allow(ENV).to receive(:[]).with(option.to_s.upcase)
             end
@@ -109,7 +109,7 @@ module ThorAddons
 
         it "should generate the correct options" do
           args = %W(foo)
-          
+
           hash.keys.each do |option|
             allow(ENV).to receive(:[]).with(option.to_s.upcase)
           end
