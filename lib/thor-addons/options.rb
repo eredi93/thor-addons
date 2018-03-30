@@ -69,16 +69,55 @@ module ThorAddons
       options_a
     end
 
+    private def string_to_type(string, type)
+      case type
+      when :boolean
+        if string.downcase == "true" || string == "1"
+          value = true
+        elsif string.downcase == "false" || string == "0"
+          value = false
+        else
+          value = nil
+        end
+      when :array
+        value = string.split(" ")
+      when :hash
+        value = string.split(" ").each_with_object({}) do |e, hsh|
+          key, value = e.split(":")
+
+          hsh[key] = value
+        end
+      when :numeric
+        if string.include?(".")
+          value = string.to_f
+        else
+          string.to_i
+        end
+      else
+        value = string
+      end
+
+      value
+    end
+
     private def options_from_env
       opts = defaults.keys.each_with_object({}) do |option, hsh|
         env = option.to_s.upcase
-        hsh[option] = ENV[env] unless ENV[env].nil?
+        unless ENV[env].nil?
+          hsh[option] = string_to_type(
+            ENV[env],
+            defaults[option][:type]
+          )
+        end
 
         next unless envs_aliases.keys.include?(env) &&
           hsh[option].nil? &&
           ENV[envs_aliases[env]]
 
-        hsh[option] = ENV[envs_aliases[env]]
+        hsh[option] = string_to_type(
+          ENV[envs_aliases[env]],
+          defaults[option][:type]
+        )
       end
 
       hash_with_indifferent_access(opts)
@@ -114,18 +153,22 @@ module ThorAddons
         command_options = data[current_command_name]
       end
 
-      hash_with_indifferent_access(global.merge(command_options))
+      config_opts = global.merge(command_options).select do |key, value|
+        defaults.keys.map(&:to_s).include?(key.to_s)
+      end
+
+      hash_with_indifferent_access(config_opts)
     end
 
     private def add_defaults(hash)
       hash.each_with_object({}) do |(k, v), hsh|
-        hsh[k] = v.nil? ? defaults[k] : v
+        hsh[k] = v.nil? ? defaults[k][:value] : v
       end
     end
 
     private def remove_defaults(hash)
       hash.each_with_object({}) do |(k, v), hsh|
-        defaults[k] == v ? hsh[k] = nil : hsh[k] = v
+        defaults[k][:value] == v ? hsh[k] = nil : hsh[k] = v
       end
     end
 
@@ -136,10 +179,11 @@ module ThorAddons
 
       options_hash = parse_options.each_with_object({}) do |(key, value), hsh|
         begin
-          hsh[key] = value.default
+          default = value.default
         rescue NoMethodError
-          hsh[key] = nil
+          default = nil
         end
+          hsh[key] = { value: default, type: value.type }
       end
 
       hash_with_indifferent_access(options_hash)
