@@ -1,0 +1,5 @@
+global:
+  biz: "config_biz"
+sub:
+  foo:
+    zip: "config_zip"
