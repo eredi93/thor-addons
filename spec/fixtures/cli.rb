@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CliPlain < Thor
   include ThorAddons::Options
 

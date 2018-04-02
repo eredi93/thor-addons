@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-#
+
 module ThorAddons
   module Options
     attr_reader :defaults, :invocations, :current_command_name
@@ -7,10 +7,9 @@ module ThorAddons
     def initialize(args = [], local_options = {}, config = {})
       @defaults = Helpers::Defaults.load(self.class, config.dup)
       @invocations = config[:invocations]
-      @current_command_name = if config[:current_command].respond_to?(:name)
-        config[:current_command].name
-      else
-        nil
+
+      if config[:current_command].respond_to?(:name)
+        @current_command_name = config[:current_command].name
       end
 
       super(args, local_options, config)
@@ -30,38 +29,45 @@ module ThorAddons
 
     def options
       original = Helpers::OptionsHash.new(super)
-      config_file = original[:config_file]
 
       return original unless with_env? || with_config_file?
 
       new_options = Helpers::Defaults.remove(original, defaults)
-
-      if with_config_file? && !config_file.nil?
-        new_options.merge!(
-          Helpers::OptionsConfigFile.parse(
-            config_file,
-            invocations,
-            current_command_name,
-            defaults
-          )
-        )
-      end
-
-      if with_env?
-        new_options.merge!(
-          Helpers::OptionsENV.parse(defaults, envs_aliases)
-        )
-      end
+      update_options!(new_options, original[:config_file])
 
       opts = Helpers::OptionsHash.new(
         Helpers::Defaults.add(new_options, defaults)
       )
 
+      validate_options(opts)
+    end
+
+    private def update_options!(opts, cfg_file)
+      update_config_options!(opts, cfg_file) if with_config_file? && cfg_file
+      update_env_options!(opts) if with_env?
+    end
+
+    private def update_config_options!(opts, cfg_file)
+      opts.merge!(
+        Helpers::OptionsConfigFile.parse(
+          cfg_file,
+          invocations,
+          current_command_name,
+          defaults
+        )
+      )
+    end
+
+    private def update_env_options!(opts)
+      opts.merge!(Helpers::OptionsENV.parse(defaults, envs_aliases))
+    end
+
+    private def validate_options(opts)
       opts.each do |key, value|
         type = defaults[key][:type]
         is_valid = Helpers::OptionType.new(value, type).valid?
 
-        raise TypeError, "'#{key}' should be a #{type.to_s}" unless is_valid
+        raise TypeError, "'#{key}' should be a #{type}" unless is_valid
       end
     end
   end

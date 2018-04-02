@@ -1,8 +1,9 @@
 # frozen_string_literal: true
-#
+
 module ThorAddons
   module Helpers
     class OptionsENV
+      # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       def self.parse(defaults, envs_aliases)
         opts = defaults.keys.each_with_object({}) do |option, hsh|
           env = option.to_s.upcase
@@ -26,6 +27,7 @@ module ThorAddons
 
         OptionsHash.new(opts)
       end
+      # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
     end
   end
 end
