@@ -15,7 +15,7 @@ module ThorAddons
         let(:hash) { { zip: "zip", biz: "option_biz" } }
 
         it "should generate the correct options" do
-          args = %W(foo --biz #{hash[:biz]})
+          args = %W[foo --biz #{hash[:biz]}]
           expect(CliPlain.start(args)).to eq(options)
         end
       end
@@ -24,30 +24,26 @@ module ThorAddons
         let(:hash) { { zip: "zip", biz: "biz", bar: "ENV_BAR" } }
 
         it "should generate the correct options" do
-          args = %W(foo --biz #{hash[:biz]})
+          args = %W[foo --biz #{hash[:biz]}]
 
-          hash.keys.each do |option|
-            if option == :bar
-              allow(ENV).to receive(:[]).with(option.to_s.upcase)
-                .and_return(hash[option])
-            else
-              allow(ENV).to receive(:[]).with(option.to_s.upcase)
-            end
+          ClimateControl.modify BAR: hash[:bar] do
+            expect(CliNoConfig.start(args)).to eq(options)
           end
-
-          expect(CliNoConfig.start(args)).to eq(options)
         end
       end
 
       context "with config" do
-        let(:hash) { { zip: "config_zip", biz: "config_biz", config_file: "config.yml" } }
         let(:config_file) { "config.yml" }
+        let(:hash) do
+          { zip: "config_zip", biz: "config_biz", config_file: config_file }
+        end
 
         it "should generate the correct options" do
-          args = %W(foo)
+          args = %w[foo]
 
           allow(File).to receive(:file?).with(config_file).and_return(true)
-          allow(YAML).to receive(:load_file).with(config_file).and_return(config_fixture)
+          allow(YAML).to receive(:load_file).with(config_file)
+            .and_return(config_fixture)
 
           expect(CliNoEnv.start(args)).to eq(options)
         end
@@ -55,13 +51,27 @@ module ThorAddons
         context "global settings missing" do
           let(:hash) { { zip: "zip", config_file: "config.yml" } }
 
-          it "should not break" do
-            args = %W(foo)
+          it "should generate the correct options" do
+            args = %w[foo]
 
             allow(File).to receive(:file?).with(config_file).and_return(true)
             allow(YAML).to receive(:load_file).with(config_file).and_return({})
 
             expect(CliNoEnv.start(args)).to eq(options)
+          end
+        end
+
+        context "option with invalid type" do
+          let(:hash) { { zip: "zip", config_file: "config.yml" } }
+
+          it "should generate the correct options" do
+            args = %w[foo]
+
+            allow(File).to receive(:file?).with(config_file).and_return(true)
+            allow(YAML).to receive(:load_file).with(config_file)
+              .and_return({ "foo" => { "bar" => [] } })
+
+            expect{CliNoEnv.start(args)}.to raise_error(TypeError)
           end
         end
       end
@@ -78,21 +88,39 @@ module ThorAddons
         let(:config_file) { "config.yml" }
 
         it "should generate the correct options" do
-          args = %W(foo)
-
-          hash.keys.each do |option|
-            if option == :bar
-              allow(ENV).to receive(:[]).with(option.to_s.upcase)
-                .and_return(hash[option])
-            else
-              allow(ENV).to receive(:[]).with(option.to_s.upcase)
-            end
-          end
+          args = %w[foo]
 
           allow(File).to receive(:file?).with(config_file).and_return(true)
-          allow(YAML).to receive(:load_file).with(config_file).and_return(config_fixture)
+          allow(YAML).to receive(:load_file).with(config_file)
+            .and_return(config_fixture)
 
-          expect(Cli.start(args)).to eq(options)
+          ClimateControl.modify BAR: hash[:bar] do
+            expect(Cli.start(args)).to eq(options)
+          end
+        end
+      end
+
+      context "with config and env and subcommand" do
+        let(:hash) do
+          {
+            zip: "config_zip",
+            biz: "config_biz",
+            bar: "ENV_BAR",
+            config_file: "config.yml"
+          }
+        end
+        let(:config_file) { "config.yml" }
+
+        it "should generate the correct options" do
+          args = %w[sub foo]
+
+          allow(File).to receive(:file?).with(config_file).and_return(true)
+          allow(YAML).to receive(:load_file).with(config_file)
+            .and_return(sub_config_fixture)
+
+          ClimateControl.modify BAR: hash[:bar] do
+            expect(CliSubCommand.start(args)).to eq(options)
+          end
         end
       end
 
@@ -108,17 +136,15 @@ module ThorAddons
         let(:config_file) { "config.yml" }
 
         it "should generate the correct options" do
-          args = %W(foo)
-
-          hash.keys.each do |option|
-            allow(ENV).to receive(:[]).with(option.to_s.upcase)
-          end
-          allow(ENV).to receive(:[]).with("ALIAS_BAR").and_return(hash[:bar])
+          args = %w[foo]
 
           allow(File).to receive(:file?).with(config_file).and_return(true)
-          allow(YAML).to receive(:load_file).with(config_file).and_return(config_fixture)
+          allow(YAML).to receive(:load_file).with(config_file)
+            .and_return(config_fixture)
 
-          expect(CliWithEnvAlias.start(args)).to eq(options)
+          ClimateControl.modify ALIAS_BAR: hash[:bar] do
+            expect(CliWithEnvAlias.start(args)).to eq(options)
+          end
         end
       end
     end

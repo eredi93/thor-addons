@@ -74,6 +74,11 @@ class Cli < Thor
   end
 end
 
+class CliSubCommand < Thor
+  desc "sub COMMANDS", "Subcommand cli"
+  subcommand "sub", Cli
+end
+
 class CliWithEnvAlias < Thor
   include ThorAddons::Options
 

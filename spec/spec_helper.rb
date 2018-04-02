@@ -1,5 +1,7 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
 require "thor-addons"
+require "ostruct"
+require "climate_control"
 
 load File.join(File.dirname(__FILE__), "fixtures", "cli.rb")
 
@@ -13,4 +15,8 @@ end
 
 def config_fixture
   YAML.load_file(fixture_path("config.yml"))
+end
+
+def sub_config_fixture
+  YAML.load_file(fixture_path("sub_config.yml"))
 end
