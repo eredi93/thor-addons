@@ -7,7 +7,7 @@ Extend [Thor](https://github.com/erikhuda/thor) with useful Add-ons
 
 ### Installation
 
-```
+```shell
 gem install thor-addons
 ```
 
@@ -20,7 +20,7 @@ The `Options` module allows you to read the CLI options from a configuration fil
 
 include the Options module to your Thor class.
 
-```
+```ruby
 require 'thor'
 require 'thor_addons'
 
@@ -39,7 +39,7 @@ end
 
 In the example above the `--bar` option will be read from the configuration file `--config-file`
 
-```
+```ruby
 foo:
   bar: "zip"
 ```
@@ -48,7 +48,7 @@ and via the environment variable `BAR`
 
 if you want to disable the configuration file you need to set in your class
 
-```
+```ruby
 def with_config_file?
   false
 end
@@ -56,7 +56,7 @@ end
 
 and for disabling the environment variables
 
-```
+```ruby
 def with_env?
   false
 end
@@ -64,8 +64,9 @@ end
 
 you can also have environment variables aliases, by setting
 
-```
+```ruby
 def envs_aliases
+  # source => alias
   { "BAR" => "MY_BAR" }
 end
 ```

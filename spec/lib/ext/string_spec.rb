@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 
 describe String do
@@ -62,7 +64,7 @@ describe String do
       invalid_values.each do |value|
         expect do
           described_class.new(value).to_b(
-            invalid_value_behaviour: Proc.new { raise ArgumentError }
+            invalid_value_behaviour: proc { raise ArgumentError }
           )
         end.to raise_error(ArgumentError)
       end
@@ -74,23 +76,30 @@ describe String do
       end
 
       it "should convert the string to an array w/ custom delimiter" do
-        expect(described_class.new("foo-bar").to_a(delimiter: "-")).to eq(%w[foo bar])
+        expect(
+          described_class.new("foo-bar").to_a(delimiter: "-")
+        ).to eq(%w[foo bar])
       end
     end
 
     describe ".to_h" do
       it "should convert the string to a hash" do
-        expect(described_class.new("foo:bar").to_h).to eq({ "foo" => "bar" })
-        expect(described_class.new("a:b c:d").to_h).to eq({ "a" => "b", "c" => "d" })
+        expect(
+          described_class.new("foo:bar").to_h
+        ).to eq("foo" => "bar")
+
+        expect(
+          described_class.new("a:b c:d").to_h
+        ).to eq("a" => "b", "c" => "d")
       end
 
       it "should convert the string to an array w/ custom delimiter" do
         expect(
-          described_class.new("foo bar").to_h(arr_sep:";", key_sep:" ")
-        ).to eq({ "foo" => "bar" })
+          described_class.new("foo bar").to_h(arr_sep: ";", key_sep: " ")
+        ).to eq("foo" => "bar")
         expect(
-          described_class.new("a b;c d").to_h(arr_sep:";", key_sep:" ")
-        ).to eq({ "a" => "b", "c" => "d" })
+          described_class.new("a b;c d").to_h(arr_sep: ";", key_sep: " ")
+        ).to eq("a" => "b", "c" => "d")
       end
     end
 
