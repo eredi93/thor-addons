@@ -18,39 +18,27 @@ module ThorAddons
         data_hash.merge(data[command])
       end
 
-      # TODO: we should improve this method
-      # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/LineLength
       def self.get_command_config_data(data, invocations, current_command_name)
-        if !invocations.nil?
-          commands = (invocations.values.flatten << current_command_name)
-          first_cmd, *remaining_cmd = commands
-          command_options = extract_command_data(data, first_cmd)
+        invocations ||= {}
+        commands = (invocations.values.flatten << current_command_name)
 
-          remaining_cmd.each do |cmd|
-            should_break = command_options[cmd].nil?
+        command_options = extract_command_data(data, commands.shift)
 
-            command_data = extract_command_data(command_options, cmd)
-            command_options.merge!(command_data)
-            command_options.delete(cmd)
-            command_options.delete("global")
+        commands.each do |cmd|
+          should_break = command_options[cmd].nil?
+          command_options.merge!(extract_command_data(command_options, cmd))
 
-            break if should_break
-          end
-        else
-          command_options = extract_command_data(data, current_command_name)
+          %W[#{cmd} global].each { |k| command_options.delete(k) }
+
+          break if should_break
         end
 
         command_options
       end
-      # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/LineLength
 
-      # rubocop:disable Metrics/MethodLength
       def self.parse(config_file, invocations, current_command_name, defaults)
         data = parse_config_file(config_file)
-
-        opts = get_command_config_data(
-          data, invocations, current_command_name
-        )
+        opts = get_command_config_data(data, invocations, current_command_name)
 
         config_opts = opts.each_with_object({}) do |(key, value), hsh|
           if defaults.keys.map(&:to_s).include?(key.to_s)
@@ -62,7 +50,6 @@ module ThorAddons
 
         OptionsHash.new(config_opts)
       end
-      # rubocop:enable Metrics/MethodLength
     end
   end
 end

@@ -3,31 +3,24 @@
 module ThorAddons
   module Helpers
     class OptionsENV
-      # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+      private_class_method def self.get_from_env_or_alias(env, envs_aliases)
+        return ENV[env] unless ENV[env].nil? && envs_aliases.keys.include?(env)
+
+        ENV[envs_aliases[env]]
+      end
+
       def self.parse(defaults, envs_aliases)
         opts = defaults.keys.each_with_object({}) do |option, hsh|
-          env = option.to_s.upcase
-          type = defaults[option][:type]
-          env_value = ENV[env]
+          value = get_from_env_or_alias(option.to_s.upcase, envs_aliases)
 
-          unless env_value.nil?
-            hsh[option] = OptionType.new(env_value, type).convert_string
+          next if value.nil?
 
-            next
-          end
-
-          next unless envs_aliases.keys.include?(env)
-
-          env_value = ENV[envs_aliases[env]]
-
-          unless env_value.nil?
-            hsh[option] = OptionType.new(env_value, type).convert_string
-          end
+          hsh[option] = OptionType.new(value, defaults[option][:type])
+            .convert_string
         end
 
         OptionsHash.new(opts)
       end
-      # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
     end
   end
 end
