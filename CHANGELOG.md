@@ -1,3 +1,11 @@
+1.0.0 (14/04/2018)
+
+IMPROVEMENTS:
+
+ * Convert ENV vars to correct type
+ * Fail if type is incorrect
+ * add rubocop
+
 0.1.5 (13/03/2018)
 
 BUG FIXES:
