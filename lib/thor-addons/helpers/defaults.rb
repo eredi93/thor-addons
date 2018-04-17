@@ -18,6 +18,8 @@ module ThorAddons
 
       def self.add(hash, defaults)
         hash.each_with_object({}) do |(k, v), hsh|
+          next unless defaults.include?(k)
+
           hsh[k] = v.nil? ? defaults[k][:value] : v
         end
       end
