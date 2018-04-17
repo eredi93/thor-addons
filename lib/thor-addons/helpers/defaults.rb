@@ -26,7 +26,7 @@ module ThorAddons
         hash.each_with_object({}) do |(k, v), hsh|
           hsh[k] = nil
 
-          hsh[k] = v unless defaults[k][:value] == v
+          hsh[k] = v unless defaults.include?(k) && defaults[k][:value] == v
         end
       end
     end
