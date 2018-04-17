@@ -1,3 +1,9 @@
+1.0.2 (17/04/2018)
+
+BUG FIXES:
+
+ * Fix failure on add defaults ([#19](https://github.com/eredi93/thor-addons/pull/19))
+
 1.0.1 (17/04/2018)
 
 BUG FIXES:
