@@ -1,3 +1,9 @@
+1.0.3 (22/04/2018)
+
+BUG FIXES:
+
+ * Fix config parsing selecting only the called commands ([#20](https://github.com/eredi93/thor-addons/pull/20))
+
 1.0.2 (17/04/2018)
 
 BUG FIXES:
