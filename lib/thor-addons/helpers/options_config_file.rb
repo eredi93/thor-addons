@@ -11,29 +11,23 @@ module ThorAddons
       end
 
       def self.extract_command_data(data, command)
-        data_hash = data["global"] || {}
-
-        return data_hash if command.nil? || data[command].nil?
-
-        data_hash.merge(data[command])
+        [data.fetch("global", {}), data.fetch(command, {})]
       end
 
       def self.get_command_config_data(data, invocations, current_command_name)
         invocations ||= {}
         commands = (invocations.values.flatten << current_command_name)
 
-        command_options = extract_command_data(data, commands.shift)
+        global_options, cmd_options = extract_command_data(data, commands.shift)
 
         commands.each do |cmd|
-          should_break = command_options[cmd].nil?
-          command_options.merge!(extract_command_data(command_options, cmd))
+          break if cmd_options[cmd].nil?
 
-          %W[#{cmd} global].each { |k| command_options.delete(k) }
-
-          break if should_break
+          global, cmd_options = extract_command_data(cmd_options, cmd)
+          global_options.merge!(global)
         end
 
-        command_options
+        global_options.merge(cmd_options)
       end
 
       def self.parse(config_file, invocations, current_command_name, defaults)

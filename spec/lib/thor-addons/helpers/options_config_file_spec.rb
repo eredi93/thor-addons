@@ -56,17 +56,17 @@ describe ThorAddons::Helpers::OptionsConfigFile do
     it "should extract the data from th given hash" do
       expect(
         described_class.extract_command_data(data, "cmd_1")
-      ).to eq("foo" => "bar", "biz" => true)
+      ).to eq([{ "foo" => "bar" }, { "biz" => true }])
     end
 
     it "should extract only the global if the command is not present" do
       expect(
         described_class.extract_command_data(data, "cmd_3")
-      ).to eq("foo" => "bar")
+      ).to eq([{ "foo" => "bar" }, {}])
     end
 
     it "should return a empty hash if the command and global not present" do
-      expect(described_class.extract_command_data({}, "cmd_3")).to eq({})
+      expect(described_class.extract_command_data({}, "cmd_3")).to eq([{}, {}])
     end
   end
 
