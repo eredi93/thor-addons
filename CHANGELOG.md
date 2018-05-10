@@ -1,3 +1,9 @@
+1.0.4 (10/05/2018)
+
+BUG FIXES:
+
+ * Fix config parsing rejecting globals if command not in config ([#20](https://github.com/eredi93/thor-addons/pull/21))
+
 1.0.3 (22/04/2018)
 
 BUG FIXES:
