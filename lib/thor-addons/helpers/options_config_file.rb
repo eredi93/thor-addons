@@ -21,10 +21,12 @@ module ThorAddons
         global_options, cmd_options = extract_command_data(data, commands.shift)
 
         commands.each do |cmd|
-          break if cmd_options[cmd].nil?
+          should_break = cmd_options[cmd].nil?
 
           global, cmd_options = extract_command_data(cmd_options, cmd)
           global_options.merge!(global)
+
+          break if should_break
         end
 
         global_options.merge(cmd_options)

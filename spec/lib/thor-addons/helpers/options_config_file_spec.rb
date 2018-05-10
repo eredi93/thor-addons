@@ -80,6 +80,14 @@ describe ThorAddons::Helpers::OptionsConfigFile do
             "cmd_2"
           )
         ).to eq("foo" => "bar", "fii" => "bii", "goo" => { "a" => "1" })
+
+        expect(
+          described_class.get_command_config_data(
+            data,
+            invocations,
+            "cmd_3"
+          )
+        ).to eq("foo" => "bar", "fii" => "bii")
       end
     end
 
