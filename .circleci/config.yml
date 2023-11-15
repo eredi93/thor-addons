@@ -1,0 +1,14 @@
+version: 2.1
+
+jobs:
+  main:
+    docker:
+      - image: cimg/ruby:3.2.2
+    steps:
+      - checkout
+      - run:
+          name: Rubocop
+          command: bundle exec rubocop
+      - run:
+          name: Specs
+          command: bundle exec rspec
