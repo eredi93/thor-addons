@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
     .reject { |f| f.match(%r{^(test|spec|features)/}) }
 
   spec.add_dependency "symbolized", "~> 0.0.1"
-  spec.add_dependency "thor", "~> 0.19"
+  spec.add_dependency "thor", "~> 1"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "climate_control"
